@@ -1,17 +1,11 @@
 package com.dstore.sms
 
 import android.os.Bundle
-import android.provider.Telephony.Sms
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.dstore.sms.ui.theme.SmsTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,4 +20,23 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+//    private fun checkAndRequestSmsPermission() {
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.SEND_SMS), SMS_PERMISSION_CODE)
+//        }
+//    }
+//
+//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        if (requestCode == SMS_PERMISSION_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//            // Permission granted
+//        } else {
+//            // Permission denied
+//            Toast.makeText(this, "SMS Permission Denied", Toast.LENGTH_SHORT).show()
+//        }
+//    }
+//
+//    companion object {
+//        private const val SMS_PERMISSION_CODE = 1001
+//    }
 }
