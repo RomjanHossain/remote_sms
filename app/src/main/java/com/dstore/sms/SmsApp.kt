@@ -2,7 +2,10 @@ package com.dstore.sms
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import android.telephony.SmsManager
 import android.telephony.SmsManager.getSmsManagerForSubscriptionId
 import android.util.Log
@@ -18,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -34,7 +38,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +55,11 @@ fun SmsApplication(modifier: Modifier) {
 
 @Composable
 fun SmsBody(modifier: Modifier) {
+    // for flash
+    lateinit var cameraManager: CameraManager
+    var cameraId: String? = null
+    var isFlashOn = false
+    // end flash
     var phoneNumber by remember { mutableStateOf("") }
     var msg by remember { mutableStateOf("") }
 
@@ -129,11 +140,11 @@ fun SmsBody(modifier: Modifier) {
                             currentContext,
                             "Message sent Successfully",
                             Toast.LENGTH_LONG
-                        )
+                        ).show()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    Toast.makeText(currentContext, "Message not sent: $e", Toast.LENGTH_LONG)
+                    Toast.makeText(currentContext, "Message not sent: $e", Toast.LENGTH_LONG).show()
                     Log.d("SMS", "Error on $e")
                 }
                 // ----------------------------
@@ -143,7 +154,46 @@ fun SmsBody(modifier: Modifier) {
         ) {
             Text("Send")
         }
+        FilledTonalButton(onClick = {
+            // Initialize Camera Manager
+            cameraManager =currentContext.getSystemService(Context.CAMERA_SERVICE)  as CameraManager
+            cameraId = cameraManager.cameraIdList.find { id ->
+                cameraManager.getCameraCharacteristics(id).get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+            }
+
+            // Request Camera Permission
+            if (ContextCompat.checkSelfPermission(currentContext, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+//                ActivityCompat.requestPermissions(currentContext, arrayOf(Manifest.permission.CAMERA), 1)
+                ActivityResultContracts.RequestPermission()
+            }
+            // main toggle function
+            if (cameraId != null) {
+                try {
+                    isFlashOn = !isFlashOn
+                    cameraManager.setTorchMode(cameraId!!, isFlashOn)
+
+                    val flashStatus = if (isFlashOn) "Flash is ON" else "Flash is OFF"
+                    Toast.makeText(currentContext, flashStatus, Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(currentContext, "Error toggling flash", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }) {
+            val flashText = if(isFlashOn){
+                "Turn Off"
+            }else{
+                "Turn On"
+            }
+            Text(flashText)
+        }
     }
+
+
+}
+
+private fun toggleFlash(cameraId:String?, isFlashOn:Boolean,) {
+
 }
 
 @Preview(showBackground = true)
@@ -165,3 +215,7 @@ private fun sendMesage(phone: String, msg: String): String {
         return "Something went wrong: $e"
     }
 }
+
+
+
+
