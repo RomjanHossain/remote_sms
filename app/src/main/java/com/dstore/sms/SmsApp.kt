@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,9 +39,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -187,6 +188,24 @@ fun SmsBody(modifier: Modifier) {
             }
             Text(flashText)
         }
+        TextButton(onClick = {
+            FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w("FMC", "Fetching FCM registration token failed", task.exception)
+                    return@OnCompleteListener
+                }
+
+                // Get new FCM registration token
+                val token = task.result
+
+                // Log and toast
+//                val msg = getString(R.string.msg_token_fmt, token)
+                Log.d("FMC", "Token : $token")
+                Toast.makeText(currentContext, msg, Toast.LENGTH_SHORT).show()
+            })
+        }) {
+            Text("Firebase Token")
+        }
     }
 
 
@@ -204,18 +223,17 @@ fun SmsBodyPrev() {
 
 @SuppressLint("CoroutineCreationDuringComposition")
 //@Composable
-private fun sendMesage(phone: String, msg: String): String {
+fun sendMessage(phone: String, msg: String): String {
     try {
-        val smsManager = SmsManager.getDefault()
-        smsManager.sendTextMessage(
-            phone, null, msg, null, null
-        )
+
+        Log.d("SMS", "sending message.....")
+        val subscriptionId = SmsManager.getDefaultSmsSubscriptionId()
+        val smsManager = getSmsManagerForSubscriptionId(subscriptionId)
+        smsManager.sendTextMessage(phone, null, msg, null, null)
         return "SuccessFully send the message"
     } catch (e: Exception) {
-        return "Something went wrong: $e"
+        throw IllegalArgumentException( "Something went wrong: $e")
     }
 }
-
-
 
 
