@@ -38,10 +38,11 @@ class SmsForegroundService : Service() {
         }
 
         // Stop the service after the SMS is sent
-        stopForeground(true)
-        stopSelf()
-
-        return START_NOT_STICKY
+//        stopForeground(true)
+//        stopSelf()
+//
+//        return START_NOT_STICKY
+        return START_STICKY
     }
 
     // Method to send the SMS

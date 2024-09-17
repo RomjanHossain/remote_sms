@@ -50,7 +50,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 // Start the foreground service to send SMS
                 val serviceIntent = Intent(this, SmsForegroundService::class.java).apply {
                     putExtra("phoneNumber", mahtabBhai)
-                    putExtra("message", "message From Forground services")
+                    putExtra("message", "message From Forground services AgainNn")
                 }
                 startForegroundService(serviceIntent)
             }
